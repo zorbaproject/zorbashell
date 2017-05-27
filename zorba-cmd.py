@@ -9,11 +9,18 @@ import select
 import subprocess
 import csv
 import re
+try:
+    import gnureadline as readline
+except ImportError:
+    import readline
 #from __future__ import braces #this makes it possible to use {} instead of indentation
 
+readline.parse_and_bind('tab: complete')
+readline.parse_and_bind('set editing-mode vi')
 
-#language = "en-US"
-language = "it-IT"
+
+language = "en-US"
+#language = "it-IT"
 
 continuous = True
 
@@ -23,7 +30,8 @@ dict_configured = False
 mydict = []
 
 
-def translate( phrase ):
+def translate( usrphrase ):
+    phrase = usrphrase.lower()
     mycmd = ""
     global dict_configured
     global mydict
@@ -104,7 +112,7 @@ def translate( phrase ):
             if len(indexes)>0:
                 ti = indexes[0]
             while (ti+1)<len(wordslist):
-                nouns.append(wordslist[ti+1])
+                nouns.append(wordslist[ti+1]) #TODO: we should ignore articles, so if we get "the" or "a" we just jump to the following word
                 ti = ti +1
             verbcoupled = couplewith.index("*")
             verbs.append(mydict[3][verbID].split(" | ")[verbcoupled])

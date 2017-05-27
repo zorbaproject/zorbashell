@@ -19,8 +19,8 @@ import subprocess
 import pyaudio
 import wave
 
-#language = "en-US"
-language = "it-IT"
+language = "en-US"
+#language = "it-IT"
 
 inst_dir = "/usr/local/lib/python3.5/dist-packages/speech_recognition/pocketsphinx-data/"
 
@@ -70,7 +70,7 @@ for (i, item) in enumerate(sys.argv):
                     print("You: {}".format(value))
                     if AUDIO_FILE!="":
                         runrecognition = False
-                    os.system(os.path.abspath(os.path.dirname(sys.argv[0])) + "/zorba-cmd.py -p '" + value + "'")
+                    os.system(os.path.abspath(os.path.dirname(sys.argv[0])) + "/zorba-cmd.py -p \"" + value + "\"")
                 except sr.UnknownValueError:
                     print("???")
                 except sr.RequestError as e:
@@ -98,6 +98,7 @@ for (i, item) in enumerate(sys.argv):
         if not found:
             print("Please take note that training MAY FAIL, since the file " + fparams + " does not contain the '-cmn current' line.")
         
+        #TODO read these from a file
         ph = []
         ph.append("<s> Anche fra le spine nascono le rose </s>")
         ph.append("<s> Buon vino fa buon sangue </s>")
