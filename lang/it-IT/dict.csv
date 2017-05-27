@@ -1,0 +1,8 @@
+ID;word;category;translation;couplewith;
+1;install(a|are|i|o|iamo);verb;apt-get install $1;*;
+2;(apr(i|ire|o|imi)|avvi(a|amo|ami|o|are)|esegu(i|o|ire|iamo|imi));verb;$1 | dolphin $1 | gpio mode $1 out && gpio write $1 1 | dolphin $1;noun-program | noun-file | noun-GPIO-pin | *;
+3;porta;noun-GPIO-pin;18;apri | chiudi;
+4;firefox;noun-program;/usr/bin/firefox;apri;
+5;(stop|chiud(i|ere|o)|ferm(a|re|o));verb;SET continuous FALSE | killall $1;noun-zorba | *;
+6;(zorba|you|tu);noun-zorba;zorba;*
+7;temp;noun-file;/tmp/;apri;
