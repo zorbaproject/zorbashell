@@ -2,9 +2,9 @@
 
 #please run this with sudo
 if [ "$(whoami)" == "root" ] ; then
-    echo "Sei root, possiamo cominciare."
+    echo "You're root, good."
 else
-    echo "Non sei root, non posso procedere. Devi eseguire questo script con il comando sudo."
+    echo "Please run this program with sudo."
     exit 1
 fi
 
@@ -16,6 +16,10 @@ pip3 install SpeechRecognition
 pip3 install PyAudio
 pip3 install pocketsphinx
 
+
+echo -n "Do you want to install it-IT language (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
 
 version="cmusphinx-it-5.2"
 inst_dir="/usr/local/lib/python3.5/dist-packages/speech_recognition/pocketsphinx-data/it-IT"
@@ -53,3 +57,5 @@ rm ./italian.lm
 rm $version.tar.gz
 rm -r $version
 rm -r ./it
+
+fi
