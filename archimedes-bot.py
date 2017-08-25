@@ -1,16 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Run this code with python2.7
+# Run this code with python3.5
 #
 
 #-ocr image from telegram photo https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#fetch-images-sent-to-your-bot
 #updates = bot.get_updates()
 #>>> print([u.message.photo for u in updates if u.message.photo])
-#-voice recognition from telegram voice  https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#download-a-file
-#file_id = message.voice.file_id
-#>>> newFile = bot.get_file(file_id)
-#>>> newFile.download('voice.ogg')
 #bot.send_voice(chat_id=chat_id, voice=open('tests/telegram.ogg', 'rb'))
 #http://telepot.readthedocs.io/en/latest/reference.html
 
@@ -21,27 +17,34 @@ import datetime
 import telepot
 import os
 import sys
-#import RPi.GPIO as GPIO
-#from w1thermsensor import W1ThermSensor
-
-
+import subprocess
+from zorbacmd import ZorbaCMD
+from speechrecognition import ZorbaSR
+from zorbachatter import ZorbaChatter
 
 telegramtoken = '' #telegram bot token from BotFather
 checkuserid = 1 #enable users whitelist, so only certain people can talk with this bot
 usersfile = 'botusers.csv' #the file where we store the list of users who can talk with bot
 attemptsfile = '/tmp/attempts.log' #the file where we log denied accesses
-relay = 18 #GPIO pin where we put the relay or the LED
-button = 17 #GPIO pin where we put the button
 active = 1 #if set to 0 the bot will stop
+
+language = "it-IT"
+
+Zorba = ZorbaCMD(language)
+
+chatter = ZorbaChatter(language)
+#chatter.clearTraining()
+chatter.train()
 
 if telegramtoken == '' and os.path.isfile("telegramtoken.txt"):
     text_file = open("telegramtoken.txt", "r")
     telegramtoken = text_file.read().replace("\n", "")
     text_file.close()
 
-print "Connecting to Telegram..."
+print("Connecting to Telegram...")
 bot = telepot.Bot(telegramtoken)
-print bot.getMe()
+print(bot.getMe())
+
 
 
     
@@ -55,12 +58,15 @@ def listusers():
     return lines
 
 def adduser(name):
+    global checkuserid
+    
     csv = ""
     users = listusers()
     if users != "":
         for usr in users:
             csv = csv+usr+","
-    csv = csv+name+","
+    if name not in csv:
+        csv = csv+name+","
     text_file = open(usersfile, "w")
     text_file.write(csv)
     text_file.close()
@@ -78,10 +84,18 @@ def deluser(name):
 
 def handle(msg):
     global bot
+    global chatter
+    global language
+    global checkuserid
+    
     chat_id = msg['chat']['id']
     sender = msg['from']['id']
 
     users = listusers()
+    if len(users) < 1:
+        checkuserid = 0
+    else:
+        checkuserid = 1
 
 
     if checkuserid == 1:
@@ -105,60 +119,59 @@ def handle(msg):
                 text_file.close()
             return
     
+    command = ''
+    
     try:
         if msg['voice'] != '':
             file_id = msg['voice']['file_id']
-            #newFile = bot.getFile(file_id)
-            bot.download_file(file_id, 'voice.ogg')
+            tmpdate = '/tmp/' + str(datetime.datetime.now()).replace(" ","_").replace(":","_") + '.jpeg'
+            #tmpdate = tmpfile.replace(" ","_")
+            #tmpdate = tmpfile.replace(":","_")
+            newFileO = "/tmp/voice" + tmpfile + "_" + str(sender) + ".ogg"
+            newFileW = "/tmp/voice" + tmpfile + "_" + str(sender) + ".wav"
+            if os.path.isfile(newFileO): os.remove(newFileO)
+            if os.path.isfile(newFileW): os.remove(newFileW)
+            bot.download_file(file_id, newFileO)
             #http://telepot.readthedocs.io/en/latest/reference.html
+            os.system("ffmpeg -i " + newFileO + " -acodec pcm_s16le -ac 1 -ar 16000 "+ newFileW)
+            sr = ZorbaSR(language, newFileW)
+            command = sr.recognize()
+            print("Recognized " + command)
+            bot.sendMessage(chat_id, "YOU: " + command)
+            if os.path.isfile(newFileO): os.remove(newFileO)
+            if os.path.isfile(newFileW): os.remove(newFileW)
     except:
-        print "No voice in this message"
+        print("No voice in this message")
         
-    command = ''
+        
     try:
         if msg['text'] != '':
             command = msg['text']
-            print 'Got command: ' + command
+            print('Got command: ' + command)
     except:
-        print "No text in this message"
+        print("No text in this message")
+        
 
     if command == '/time':
         bot.sendMessage(chat_id, str(datetime.datetime.now()))
     elif '/adduser' in command:
         if len(command.split(' ')) > 1:
             usrname = command.split(' ')[1]
-            adduser(usrname)
-            bot.sendMessage(chat_id, "User "+usrname+" added")
+        else:
+            usrname = ""
+        if usrname == "" :
+            usrname = str(sender)
+        adduser(usrname)
+        bot.sendMessage(chat_id, "User "+usrname+" added")
     elif '/deluser' in command:
         if len(command.split(' ')) > 1:
             usrname = command.split(' ')[1]
-            deluser(usrname)
-            bot.sendMessage(chat_id, "User "+usrname+" deleted")
-    #elif 'webcam' in command:
-    #    tmpfile = '/tmp/'+str(datetime.datetime.now())+str(sender)+'.jpeg'
-    #    tmpfile = tmpfile.replace(" ","_")
-    #    tmpfile = tmpfile.replace(":","_")
-    #    os.system("streamer -s 1280x720 -f jpeg -o "+tmpfile)
-    #    bot.sendPhoto(chat_id, open(tmpfile, "rb"), caption = tmpfile)
-    #    os.remove(tmpfile)
-    #elif '/pinon' in command:
-    #    pin = relay
-    #    if len(command.split(' ')) > 1:
-    #        pin = command.split(' ')[1]
-    #    GPIO.setup(int(pin), GPIO.OUT)
-    #    GPIO.output(int(pin), GPIO.HIGH)
-    #    bot.sendMessage(chat_id, "Set "+str(pin)+" HIGH")
-    #elif '/pinoff' in command:
-    #    pin = relay
-    #    if len(command.split(' ')) > 1:
-    #        pin = command.split(' ')[1]
-    #    GPIO.setup(int(pin), GPIO.OUT)
-    #    GPIO.output(int(pin), GPIO.LOW)
-    #    bot.sendMessage(chat_id, "Set "+str(pin)+" LOW")
-    #elif '/temperature' in command:
-    #    sensor = W1ThermSensor()
-    #    temperature_in_celsius = sensor.get_temperature()
-    #    bot.sendMessage(chat_id, "Temperature is "+str(temperature_in_celsius)+"° Celsius")
+        else:
+            usrname = ""
+        if usrname == "" :
+            usrname = str(sender)
+        deluser(usrname)
+        bot.sendMessage(chat_id, "User "+usrname+" deleted")
     elif command == '/help':
         bot.sendMessage(chat_id, "/adduser /deluser /time /exit")
     elif command == '/exit':
@@ -166,35 +179,52 @@ def handle(msg):
         active = False
         bot.sendMessage(chat_id, "The bot will shutdown in 10 seconds")
     elif command != '':
-        bot.sendMessage(chat_id, 'echo: ' + command + ' from: '+str(sender))
+        tr_cmd = Zorba.translate(command)
+        if "SAYHELLO" == tr_cmd:
+            res = "  ^_^\n"
+            res = res + "(*.*)\n"
+            res = res + "  ---"
+            bot.sendMessage(chat_id, res)
+        elif "WHAT?" == tr_cmd:
+            answer = chatter.reply(command)
+            bot.sendMessage(chat_id, str(answer))
+        else:
+            print(tr_cmd)
+            #bot.sendMessage(chat_id, str(tr_cmd))
+            cmdoutput = ""
+            cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
+            print("OUTPUT:" + cmdoutput)
+            
+            if cmdoutput != "":
+                if cmdoutput[:8] == "photo://":
+                    tmpfile = cmdoutput.replace("photo://", "")
+                    tmpfile = tmpfile.replace("\\n", "")
+                    if os.path.isfile(tmpfile):
+                        bot.sendPhoto(chat_id, open(tmpfile, "rb"), caption = tmpfile)
+                        os.remove(tmpfile)
+                elif cmdoutput[:4] == "Msg:":
+                    msg = cmdoutput.replace("Msg:", "")
+                    msg = msg.encode().decode('unicode_escape')
+                    bot.sendMessage(chat_id, str(msg))
+            else:
+                bot.sendMessage(chat_id, str(tr_cmd))
 
-def my_callback(pin):
-    input_value = 0 #GPIO.input(pin)
-    print "The GPIO pin input "+str(pin)+" has value: "+str(input_value)
-    users = listusers()
-    if users != "":
-        for usr in users:
-            bot.sendMessage(usr, "The button on GPIO pin "+str(pin)+" changed value: "+str(input_value))
+
+#TODO: rewrite this function to send user text written by other scripts on a temporary file (that gets removed after sending message)
+#def my_callback(pin):
+#    input_value = 0 #GPIO.input(pin)
+#    print("The GPIO pin input "+str(pin)+" has value: "+str(input_value))
+#    users = listusers()
+#    if users != "":
+#        for usr in users:
+#            bot.sendMessage(usr, "The button on GPIO pin "+str(pin)+" changed value: "+str(input_value))
 
 
-#print "Connecting to Telegram..."
-#bot = telepot.Bot(telegramtoken)
-#print bot.getMe()
-
-#os.system('modprobe w1-gpio')
-#os.system('modprobe w1-therm')
-
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setwarnings(False)
-
-#GPIO.setup(button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.add_event_detect(button, GPIO.BOTH)
-#GPIO.add_event_callback(button, my_callback)
 
 bot.message_loop(handle)
-print 'I am listening ...'
+print('I am listening ...')
 
 while active:
     time.sleep(10)
-print "Exiting"
+print("Exiting")
 sys.exit()
