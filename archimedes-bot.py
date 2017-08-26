@@ -33,7 +33,7 @@ language = "it-IT"
 Zorba = ZorbaCMD(language)
 
 chatter = ZorbaChatter(language)
-#chatter.clearTraining()
+chatter.clearTraining()
 chatter.train()
 
 if telegramtoken == '' and os.path.isfile("telegramtoken.txt"):

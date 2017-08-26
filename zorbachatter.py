@@ -9,6 +9,7 @@
 import os
 import os.path
 import sys
+import time
 
 from chatterbot import ChatBot
 
@@ -50,7 +51,8 @@ class ZorbaChatter(object):
         return response
     
     def clearTraining(self):
-        if os.path.isfile(self.database): os.remove(self.database)
+        self.chatbot.storage.drop()
+        self.chatbot.storage.create()
     
     def checkdirnotempty(self, folder = ""):
         check = False
