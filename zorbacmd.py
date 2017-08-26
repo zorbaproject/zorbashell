@@ -12,7 +12,7 @@ import re
 #try:
 #    import gnureadline as readline
 #except ImportError:
-    import readline
+#    import readline
 #from __future__ import braces #this makes it possible to use {} instead of indentation
 
 #readline.parse_and_bind('tab: complete')
@@ -27,9 +27,21 @@ class ZorbaCMD(object):
 #        self.continuous = True
         self.dict_configured = False
         self.mydict = []
+        
+    def find_between(self, s, first, last ):
+        try:
+            start = 0
+            if first != "":
+                start = s.index( first ) + len( first )
+            end = len(s)-1
+            if last != "":
+                end = s.index( last, start )
+            return s[start:end]
+        except ValueError:
+            return ""
 
 
-    def translate( usrphrase ):
+    def translate(self, usrphrase):
         phrase = usrphrase.lower()
         mycmd = ""
         #global dict_configured
@@ -37,7 +49,7 @@ class ZorbaCMD(object):
     
         if self.dict_configured == False:
             #loading dictionary
-            dict_file = os.path.abspath(os.path.dirname(sys.argv[0])) + "/lang/" + language + "/dict.csv"
+            dict_file = os.path.abspath(os.path.dirname(sys.argv[0])) + "/lang/" + self.language + "/dict.csv"
             origdict = list(csv.reader(open(dict_file), delimiter=';')) #this is [row][column]
             self.mydict = list(map(list, zip(*origdict))) #this is [colum][row]
             self.dict_configured = True
@@ -74,7 +86,7 @@ class ZorbaCMD(object):
             if ni>-1: 
                 if "noun-program" in self.mydict[2][ni]:
                     mycmd = mycmd + self.mydict[3][ni] #it's a program, just run it
-                elif "noun-zorba" in self.mydict[2][ni]:
+                elif "noun-zorba" in self.mydict[2][ni] and len(wordslist)<2:
                     #print("Hi") #are you trying to wake me up from standby?
                     mycmd="SAYHELLO"
                 elif "noun-" in self.mydict[2][ni]:
@@ -100,10 +112,26 @@ class ZorbaCMD(object):
                     ni = indexes[0]
                     
                 if ni>-1 and self.mydict[2][ni] in couplewith:
-                    nouns.append(self.mydict[3][ni])
-                    #TODO: we should enable multiple meanings for nouns, using couplewith, for example: /usr/bin/firefox | firefox;open | stop; so you get the first when coupled with open and the second when cuopled with stop. This could be useful in a few cases
-                    verbcoupled = couplewith.index(self.mydict[2][ni])
-                    verbs.append(self.mydict[3][verbID].split(" | ")[verbcoupled])
+                    if self.mydict[2][ni] == "context-search":
+                        searchverb = ""
+                        indexes = [r for r,val in enumerate(wordslist) if re.match(self.mydict[1][verbID], val)]
+                        ti = -1
+                        if len(indexes)>0:
+                            searchverb = wordslist[(indexes[0])]
+                        subphrase = self.find_between(usrphrase.lower(), searchverb, word) #all chars between verb and wiki
+                        subphrase = self.stripuseless(subphrase)
+                        subphrase = self.unifyspaces(subphrase)
+                        if subphrase == "" or subphrase == " ":
+                            for tmpword in wordslist:
+                                if tmpword.lower() != searchverb and tmpword.lower() != word:
+                                    subphrase = subphrase + " " + tmpword
+                        nouns.append(subphrase)
+                        verbcoupled = couplewith.index(self.mydict[2][ni])
+                        verbs.append(self.mydict[3][verbID].split(" | ")[verbcoupled])
+                    else:
+                        nouns.append(self.mydict[3][ni])
+                        verbcoupled = couplewith.index(self.mydict[2][ni])
+                        verbs.append(self.mydict[3][verbID].split(" | ")[verbcoupled])
 
             if "*" in couplewith:
                 indexes = [r for r,val in enumerate(wordslist) if re.match(self.mydict[1][verbID], val)]
@@ -126,8 +154,18 @@ class ZorbaCMD(object):
                     break
                 nni = nni + 1
             
+            
             if ni<len(verbs):
                 mycmd = mycmd + verbs[ni].replace("$1", nouns[ni])
+                mycmd = mycmd.replace("$L", self.language)
+            
+             #   mycmd = mycmd.replace("  ", " ")
+                
+                
+            #now we strip useless words
+            mycmd = mycmd.replace("./scripts/", os.path.abspath(os.path.dirname(sys.argv[0]))+"/scripts/")
+            mycmd = self.stripuseless(mycmd)
+            mycmd = self.unifyspaces(mycmd)
             #print(nouns)
             #print(verbs)
     
@@ -137,43 +175,21 @@ class ZorbaCMD(object):
             mycmd = "WHAT?" #we didn't get anything, that's weird
         return mycmd;
         
-
+        
     
-    #def runcmd( tr_cmd ):
-    #    if "SET continuous FALSE" == tr_cmd:
-    #        global continuous
-    #        continuous = False
-    #    elif "SAYHELLO" == tr_cmd:
-    #        print(" ^_^")
-    #        print("(*.*)")
-    #        print(" ---")
-    #    elif "WHAT?" == tr_cmd:
-    #        print("???")
-    #    else:
-    #        print(tr_cmd)
-    #        #os.system(tr_cmd)
+    def stripuseless(self, phrase):
+        for i in range(len(self.mydict[2])):
+            if self.mydict[2][i] == "useless":
+                phrase = re.sub(self.mydict[1][i], "", phrase)
+        return phrase
+    
+    def unifyspaces(self, phrase):
+        while "  " in phrase:
+            phrase = phrase.replace("  ", " ")
+        phrase = re.sub("\A ", "", phrase)
+        phrase = re.sub(" \Z", "", phrase)
+        return phrase
     
 
-
-
-#    for (i, item) in enumerate(sys.argv):
-#        if item == "-h":
-#            print("Options:\n -l specify language\n -p specify phrase to analize\n -c continuous mode, works as a shell")
-#            
-#        if item == "-l":
-#            language = sys.argv[i+1]
-#            print("LANGUAGE: " + language)
-#            
-#        if item == "-p":
-#            #TODO: we should split phrases here like we do in the -c case
-#            tr_cmd = translate(sys.argv[i+1])
-#            runcmd(tr_cmd)
-#            
-#        if item == "-c":
-#            while continuous:
-#                phrase = input("You: ")
-#                phrases = list(filter(None, re.split("[;.!?]", phrase))) #if we've got multiple phrases, we split them
-#                for (p, itemp) in enumerate(phrases):
-#                    tr_cmd = translate(phrases[p])
-#                    runcmd(tr_cmd)
-    
+    #TODO: we still need to use ZorbaNeuralNetwork to find most probable meaning for phrases that we can't actually translate with our dictionary
+    #TODO: ZorbaNeural could also be useful to understand emotions and feelings in the messages

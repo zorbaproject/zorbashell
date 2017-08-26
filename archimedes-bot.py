@@ -198,7 +198,7 @@ def handle(msg):
             if cmdoutput != "":
                 if cmdoutput[:8] == "photo://":
                     tmpfile = cmdoutput.replace("photo://", "")
-                    tmpfile = tmpfile.replace("\\n", "")
+                    tmpfile = tmpfile.replace("\n", "")
                     if os.path.isfile(tmpfile):
                         bot.sendPhoto(chat_id, open(tmpfile, "rb"), caption = tmpfile)
                         os.remove(tmpfile)
