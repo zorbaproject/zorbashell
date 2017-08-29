@@ -1,11 +1,14 @@
-#Zorba-CMD
+# Zorba-CMD
 Zorba-CMD is an interpreter that translates human language into shell commands
 
-##History
-The Zorba Project started in 2006, with a first version of zorba-cmd written in VisualBasic6 by Luca Tringali. Later in 2010 the interpreter has beeen translated in Python2, and in 2017 it has been adapted for Python3. Once published on TRingali's personal website, now it's hosted on GitHub.
+## History
+The Zorba Project started in 2006, with a first version of zorba-cmd written in VisualBasic6 by Luca Tringali. Later in 2010 the interpreter has beeen translated in Python2, and in 2017 it has been adapted for Python3. Once published on Tringali's personal website, now it's hosted on GitHub.
+
+## Installing and using Zorba-CMD
+Please look at INSTALL.txt
 
 
-##How does the dictionary work?
+## How does the dictionary work?
 The dictionary is a *dict.csv* file in the folder *./lang/en-US/dict.csv*. Of course, you can create a dictionary for every language. It contains this kind of table:
 ```csv
 ID;word;category;translation;couplewith;
@@ -28,11 +31,5 @@ where:
 - **couplewith** is the contexts where you can use this word: the order of the contexts must match the roder of the translations, and * means every context.
 
 
-##Speech recognition
-
-First of all, install sphinx using the bash script *./install-sphinx.sh*. If everything goes well, you can try the speech recognition program running:
-```bash
-chmod +x ./speechrecognition.py
-./speechrecognition.py
-```
-It is possible to adapt the default language model to your voice using *-t* option ("t" means "training", even if this is not actually a full training but just an adaptation).
+## Speech recognition
+Speech recognition is based on Sphinx, you can adapt the vocal model to your voice using "-t" option.

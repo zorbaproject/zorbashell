@@ -28,7 +28,9 @@ EOF
 
 #add line on /etc/crontab for auto update
 cronfile="/etc/crontab"
-updatefile=$(pwd)"/autoupdate-archimedes-bot.sh"
+updatefile=$(pwd)"/install/autoupdate-archimedes-bot.sh"
 if grep -q "$updatefile" "$cronfile"; then
 echo "00,30 * * * * $updatefile" >> $cronfile
 fi
+
+apt-get install tesseract-ocr tesseract-ocr-all

@@ -8,18 +8,6 @@ else
     exit 1
 fi
 
-apt-get install portaudio19-dev
-apt-get install -qq python3 python-dev python3-pip build-essential swig libpulse-dev
-apt-get install pocketsphinx sphinxtrain
-pip3 install --upgrade pip
-pip3 install SpeechRecognition
-pip3 install PyAudio
-pip3 install pocketsphinx
-
-
-echo -n "Do you want to install it-IT language (y/n)? "
-read answer
-if echo "$answer" | grep -iq "^y" ;then
 
 version="cmusphinx-it-5.2"
 inst_dir="/usr/local/lib/python3.5/dist-packages/speech_recognition/pocketsphinx-data/it-IT"
@@ -58,4 +46,7 @@ rm $version.tar.gz
 rm -r $version
 rm -r ./it
 
-fi
+apt-get install mbrola-it3 mbrola-it4
+
+#wget http://www.tcts.fpms.ac.be/synthesis/mbrola/dba/it3/it3-010304.zip
+#wget http://www.tcts.fpms.ac.be/synthesis/mbrola/dba/it4/it4-010926.zip

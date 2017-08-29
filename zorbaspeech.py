@@ -15,13 +15,13 @@ import shutil
 import os
 import select
 import subprocess
-
+import datetime
 
 import pyaudio
 import wave
 
 
-class ZorbaSR(object):
+class ZorbaSpeech(object):
     
     def __init__(self, lang = "en-US", afile = ""):
         self.language = lang
@@ -39,6 +39,8 @@ class ZorbaSR(object):
         
         
         self.AUDIO_FILE = afile
+        
+        self.chooseVoice()
     
     
     
@@ -94,6 +96,47 @@ class ZorbaSR(object):
             except KeyboardInterrupt:
                 pass
             
+            
+    def chooseVoice(self):
+            mblang = ""
+            #load settings from file
+            #mblang = "mb-it4"
+            vfile = os.path.abspath(os.path.dirname(sys.argv[0])) + '/lang/' + self.language + '/sphinxadapt.txt'
+            if os.path.isfile(vfile):
+                text_file = open(vfile, "r")
+                lines = text_file.read()
+                text_file.close()
+                if lines != "":
+                    mblang = lines.split(",")[0]
+            self.espeaklang = self.language.split("-")[0]
+            mbfolder = "/usr/share/mbrola/"
+            
+            if mblang == "" or os.path.isdir(mbfolder + mblang[3:]) == False:
+                if os.path.isdir(mbfolder):
+                    entities = os.listdir(mbfolder)
+                    for entity in entities:
+                        if os.path.isdir(mbfolder + entity) and entity[:len(self.espeaklang)]==str(self.espeaklang) :
+                            mblang = "mb-" + entity
+                            break
+            if (mblang != ""):
+                self.espeaklang = mblang
+            return self.espeaklang
+            
+    def speak(self, answer = "", chat_id = ""):
+            tmpfile = str(datetime.datetime.now()).replace(" ","_").replace(":","_")
+            newFileW = "/tmp/voice" + tmpfile + "_" + str(chat_id) + ".wav"
+            #http://telepot.readthedocs.io/en/latest/reference.html
+            if self.espeaklang == "":
+                self.chooseVoice()
+            if self.espeaklang != "":
+                os.system('espeak -v ' + self.espeaklang + ' -s 150 -p 50 -w ' + newFileW + ' "' + str(answer) + '"')
+            else:
+                return str("")
+            #wave is massive, even if this feature is not designed for long messages, we should think about using OGG instead of WAV
+            
+            #if chat_id is empty, we should just play the file
+            return newFileW
+        
     def train(self, choice = "no"):
             #TODO: -copy immediately original self.language model in current_pwd and work only on the copy -edit if needed the feat.params file on the copy
             
