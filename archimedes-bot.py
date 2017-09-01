@@ -26,8 +26,14 @@ checkuserid = 1 #enable users whitelist, so only certain people can talk with th
 usersfile = 'botusers.csv' #the file where we store the list of users who can talk with bot
 attemptsfile = '/tmp/attempts.log' #the file where we log denied accesses
 active = 1 #if set to 0 the bot will stop
+ocrlang = ''
+language = ''#'it-IT'
 
-language = "it-IT"
+if language == '' and os.path.isfile("zorbalanguage.txt"):
+    text_file = open("zorbalanguage.txt", "r")
+    language = text_file.read().replace("\n", "")
+    text_file.close()
+
 
 Zorba = ZorbaCMD(language)
 
@@ -47,6 +53,20 @@ bot = telepot.Bot(telegramtoken)
 print(bot.getMe())
 
 
+
+def getocrlang():
+    global language
+    global ocrlang
+    
+    #NOTE: this si just an hack, probably it's better to build a translation array
+    cmdoutput = subprocess.check_output("tesseract --list-langs", shell=True).decode('UTF-8')
+    tesseractlangs = cmdoutput.split("\n")
+    for i in range(len(tesseractlangs)):
+        if tesseractlangs[i][:2] == language[:2]:
+            ocrlang = tesseractlangs[i]
+    if ocrlang == "":
+        ocrlang = "eng"
+    return ocrlang
 
     
 def listusers():
@@ -86,6 +106,7 @@ def deluser(name):
 def sendMessage(chat_id, answer = "", voice = False):
     global bot
     global language
+    global ocrlang
     
     if answer != "":
         if voice == True:
@@ -174,9 +195,10 @@ def handle(msg):
         newFileJ = "/tmp/photo" + tmpfile + str(i) + "_" + str(sender) + ".jpg"
         newFileT = "/tmp/photo" + tmpfile + str(i) + "_" + str(sender) + ".txt"
         bot.download_file(file_id, newFileJ)
-        #os.system("tesseract -l " + language + " -psm 3 -oem 3 " + newFileJ + " " + newFileT) # + " 1>/dev/null 2>&1"
-        ocrlang = "ita"
-        os.system("tesseract -l " + ocrlang + " -psm 3 " + newFileJ + " " + newFileT[:-4]) #psm7 is better?
+        #TODO: convert language from standard en-US
+        if ocrlang == "":
+            getocrlang()
+        os.system("tesseract -l " + ocrlang + " -psm 3 " + newFileJ + " " + newFileT[:-4]) #psm7 is better? https://github.com/tesseract-ocr/tesseract/wiki/Command-Line-Usage
         if os.path.isfile(newFileT):
             text_file = open(newFileT, "r")
             lines = text_file.read()
