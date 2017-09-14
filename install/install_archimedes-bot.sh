@@ -9,6 +9,9 @@ else
 fi
 
 
+pip3 install telepot
+pip3 install chatterbot
+
 #We should ask for Telegram Token
 echo "Please write here your Telegram Bot Token:"
 read $token

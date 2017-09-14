@@ -180,7 +180,7 @@ def handle(msg):
         if os.path.isfile(newFileO): os.remove(newFileO)
         if os.path.isfile(newFileW): os.remove(newFileW)
     
-    print(msg)
+    #print(msg)
     photo = False
     try:
         if msg['photo'] != '':
@@ -276,6 +276,7 @@ def handle(msg):
 
 
 #TODO: rewrite this function to send user text written by other scripts on a temporary file (that gets removed after sending message)
+#https://www.michaelcho.me/article/using-pythons-watchdog-to-monitor-changes-to-a-directory
 #def my_callback(pin):
 #    input_value = 0 #GPIO.input(pin)
 #    print("The GPIO pin input "+str(pin)+" has value: "+str(input_value))
