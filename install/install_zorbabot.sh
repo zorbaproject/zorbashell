@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #please run this with sudo
 if [ "$(whoami)" == "root" ] ; then
     echo "You're root, good."
@@ -18,20 +19,20 @@ read $token
 echo $token > $(pwd)/telegramtoken.txt
 
 
-cat << EOF > /lib/systemd/system/archimedes-bot.service
+cat << EOF > /lib/systemd/system/zorbabot.service
 [Unit]
 Description=Archimedes bot on Telegram with Zorba CMD
 [Service]
-ExecStart=$(pwd)/archimedes-bot.py
+ExecStart=$(pwd)/zorbabot.py
 StandardOutput=null
 [Install]
 WantedBy=multi-user.target
-Alias=archimedes-bot.service
+Alias=zorbabot.service
 EOF
 
 #add line on /etc/crontab for auto update
 cronfile="/etc/crontab"
-updatefile=$(pwd)"/install/autoupdate-archimedes-bot.sh"
+updatefile=$(pwd)"/install/autoupdate-zorbabot.sh"
 if grep -q "$updatefile" "$cronfile"; then
 echo "00,30 * * * * $updatefile" >> $cronfile
 fi
