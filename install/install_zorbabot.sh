@@ -15,7 +15,7 @@ pip3 install chatterbot
 
 #We should ask for Telegram Token
 echo "Please write here your Telegram Bot Token:"
-read $token
+read token
 echo $token > $(pwd)/telegramtoken.txt
 
 
@@ -37,4 +37,4 @@ if grep -q "$updatefile" "$cronfile"; then
 echo "00,30 * * * * $updatefile" >> $cronfile
 fi
 
-apt-get install tesseract-ocr tesseract-ocr-all
+apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ita

@@ -8,10 +8,11 @@ else
     exit 1
 fi
 
+apt-get install -qq python3 python3-dev python-dev python3-pip build-essential swig libpulse-dev
 apt-get install portaudio19-dev
-apt-get install -qq python3 python-dev python3-pip build-essential swig libpulse-dev
 apt-get install pocketsphinx sphinxtrain
-pip3 install --upgrade pip
+apt-get install sphinxbase-utils
+pip3 install -U pip setuptools
 pip3 install SpeechRecognition
 pip3 install PyAudio
 pip3 install pocketsphinx

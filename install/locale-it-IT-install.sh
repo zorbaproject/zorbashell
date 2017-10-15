@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "Please, note that you need to have at least Pocketshpinx 0.0.9"
+
 #please run this with sudo
 if [ "$(whoami)" == "root" ] ; then
     echo "You're root, good."
