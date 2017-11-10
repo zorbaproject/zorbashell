@@ -23,6 +23,7 @@ cat << EOF > /lib/systemd/system/zorbabot.service
 [Unit]
 Description=Archimedes bot on Telegram with Zorba CMD
 [Service]
+WorkingDirectory=$(pwd)
 ExecStart=$(pwd)/zorbabot.py
 StandardOutput=null
 [Install]
