@@ -1,16 +1,16 @@
 ID;word;category;translation;couplewith;
-1;install(a|are|i|o|iamo);verb;apt-get install $1;*;
-2;(apr(i|ire|o|imi)|avvi(a|amo|ami|o|are)|esegu(i|o|ire|iamo|imi));verb;$1 | dolphin $1 | gpio mode $1 out && gpio write $1 1 | dolphin $1;noun-program | noun-file | noun-GPIO-pin | *;
-3;porta;noun-GPIO-pin;18;apri | chiudi;
-4;firefox;noun-program;/usr/bin/firefox;apri;
-5;(stop|chiud(i|ere|o)|ferm(a|re|o));verb;SET continuous FALSE | gpio mode $1 out && gpio write $1 0 | killall $1;noun-zorba | noun-GPIO-pin | *;
-6;(zorba|you|tu);noun-zorba;zorba;*
-7;temp;noun-file;/tmp/;apri;
-8;cerca;verb;./scripts/search-wiki.sh $L '$1' | find / -iname '$1';context-search | *;
-4;webcam;noun-program;./scripts/webcam-photo.sh;apri;
-9;wik(i|ipedia);context-search;it.wikipedia.org;cerca;
+1;^install(a|are|i|o|iamo)$;verb;apt-get install $1;*;
+2;^(apr(i|ire|o|imi)|avvi(a|amo|ami|o|are)|esegu(i|o|ire|iamo|imi))$;verb;$1 | dolphin $1 | gpio mode $1 out && gpio write $1 1 | dolphin $1;noun-program | noun-file | noun-GPIO-pin | *;
+3;^porta$;noun-GPIO-pin;18;apri | chiudi;
+4;^firefox$;noun-program;/usr/bin/firefox;apri;
+5;^(stop|chiud(i|ere|o)|ferm(a|re|o))$;verb;SET continuous FALSE | gpio mode $1 out && gpio write $1 0 | killall $1;noun-zorba | noun-GPIO-pin | *;
+6;^(zorba|you|tu)$;noun-zorba;zorba;*
+7;^temp$;noun-file;/tmp/;apri;
+8;^cerca$;verb;./scripts/search-wiki.sh $L '$1' | find / -iname '$1';context-search | *;
+4;^webcam$;noun-program;./scripts/webcam-photo.sh;apri;
+9;^wik(i|ipedia)$;context-search;it.wikipedia.org;cerca;
 10;\bs(u|ulla|ui)\b;useless;;*
 11;\b(in|nel|nello|nella|nelle)\b;useless;;*
 12;\bu(n|na|no)\b;useless;;*
 13;\b(i|lo|la|i|gli|le)\b;useless;;*
-14;temperatura;noun-program;./scripts/read-w1temp.py;apri;
+14;^temperatura$;noun-program;./scripts/read-w1temp.py;apri;
