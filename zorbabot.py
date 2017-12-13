@@ -270,7 +270,8 @@ def handle(msg):
                 elif cmdoutput[:4] == "Msg:":
                     msg = cmdoutput.replace("Msg:", "")
                     msg = msg.encode().decode('unicode_escape')
-                    sendMessage(chat_id, str(msg), voice)
+                    if msg != '':
+                        sendMessage(chat_id, str(msg), voice)
             else:
                 sendMessage(chat_id, str(tr_cmd))
 

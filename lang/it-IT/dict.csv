@@ -13,3 +13,4 @@ ID;word;category;translation;couplewith;
 11;\b(in|nel|nello|nella|nelle)\b;useless;;*
 12;\bu(n|na|no)\b;useless;;*
 13;\b(i|lo|la|i|gli|le)\b;useless;;*
+14;temperatura;noun-program;./scripts/read-w1temp.py;apri;
