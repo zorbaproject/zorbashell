@@ -58,7 +58,7 @@ def getocrlang():
     global language
     global ocrlang
     
-    #NOTE: this si just an hack, probably it's better to build a translation array
+    #NOTE: this is just an hack, probably it's better to build a translation array
     cmdoutput = subprocess.check_output("tesseract --list-langs", shell=True).decode('UTF-8')
     tesseractlangs = cmdoutput.split("\n")
     for i in range(len(tesseractlangs)):
@@ -106,23 +106,28 @@ def deluser(name):
 def sendMessage(chat_id, answer = "", voice = False):
     global bot
     global language
-    global ocrlang
     
     if answer != "":
         if voice == True:
             #we should send audio
             newFileW = speech.speak(str(answer), str(chat_id))
-            #os.system('espeak -s 150 -p 50 -w ' + newFileW + ' "' + str(answer) + '"')
-            bot.sendVoice(chat_id, open(newFileW, "rb"), caption = str(answer))
+            if chat_id > 0:
+                bot.sendVoice(chat_id, open(newFileW, "rb"), caption = str(answer))
+            else:
+                os.system('aplay "' + newFileW + '"')
             if os.path.isfile(newFileW): os.remove(newFileW)
         else:
-            bot.sendMessage(chat_id, str(answer))
+            if chat_id > 0:
+                bot.sendMessage(chat_id, str(answer))
+            else:
+                print(str(answer))
 
 def handle(msg):
     global bot
     global chatter
     global language
     global checkuserid
+    global active
     
     chat_id = msg['chat']['id']
     sender = msg['from']['id']
@@ -195,7 +200,6 @@ def handle(msg):
         newFileJ = "/tmp/photo" + tmpfile + str(i) + "_" + str(sender) + ".jpg"
         newFileT = "/tmp/photo" + tmpfile + str(i) + "_" + str(sender) + ".txt"
         bot.download_file(file_id, newFileJ)
-        #TODO: convert language from standard en-US
         if ocrlang == "":
             getocrlang()
         os.system("tesseract -l " + ocrlang + " -psm 3 " + newFileJ + " " + newFileT[:-4]) #psm7 is better? https://github.com/tesseract-ocr/tesseract/wiki/Command-Line-Usage
@@ -253,6 +257,8 @@ def handle(msg):
         elif "WHAT?" == tr_cmd:
             answer = chatter.reply(command)
             sendMessage(chat_id, str(answer), voice)
+        elif "SET continuous FALSE" == tr_cmd:
+                        active = False
         else:
             print(tr_cmd)
             #sendMessage(chat_id, str(tr_cmd))
@@ -270,7 +276,7 @@ def handle(msg):
                 elif cmdoutput[:4] == "Msg:":
                     msg = cmdoutput.replace("Msg:", "")
                     msg = msg.encode().decode('unicode_escape')
-                    if msg != '':
+                    if str(msg) != '':
                         sendMessage(chat_id, str(msg), voice)
             else:
                 sendMessage(chat_id, str(tr_cmd))
