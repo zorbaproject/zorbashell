@@ -13,6 +13,14 @@ from zorbacmd import ZorbaCMD
 from zorbaspeech import ZorbaSpeech
 from zorbachatter import ZorbaChatter
 
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+#got code from https://www.michaelcho.me/article/using-pythons-watchdog-to-monitor-changes-to-a-directory
+#pip3 install watchdog
+
+
 try:
     import gnureadline as readline
 except ImportError:
@@ -42,27 +50,45 @@ singlerun = False
 continuous = True
 voice = False
 
-bot = 0
-chat_id = 0
+bot = []
+chat_id = ""
 
-def sendMessage(chat_id, answer = "", voice = False):
+
+
+class zwHandler(FileSystemEventHandler):
     global bot
-    global language
-    
-    if answer != "":
-        if voice == True:
-            #we should send audio
-            newFileW = speech.speak(str(answer), str(chat_id))
-            if chat_id > 0:
-                bot.sendVoice(chat_id, open(newFileW, "rb"), caption = str(answer))
-            else:
-                os.system('aplay "' + newFileW + '"')
-            if os.path.isfile(newFileW): os.remove(newFileW)
-        else:
-            if chat_id > 0:
-                bot.sendMessage(chat_id, str(answer))
-            else:
-                print(str(answer))
+    @staticmethod
+    def on_any_event(event):
+        if event.is_directory:
+            return None
+
+        #elif event.event_type == 'created':
+        elif event.event_type == 'modified':
+            try:
+                Zorba.set_telegramusers(listusers())
+            except:
+                nousers = True
+            if os.path.isfile(event.src_path):
+                content = ""
+                text_file = open(event.src_path, "r")
+                content = text_file.read().replace("\n", "")
+                text_file.close()
+                if content[:4] != "CMD:":
+                    Zorba.display_output(content, "", bot)
+                else:
+                    tr_cmd = Zorba.translate(content.replace("CMD:", ""))
+                    if "WHAT?" == tr_cmd:
+                        answer = chatter.reply(content)
+                        Zorba.sendMessage(chat_id, bot, str(answer))
+                    else:
+                        try:
+                            cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
+                        except:
+                            cmdoutput = ""
+                        if cmdoutput != "":
+                            Zorba.display_output(cmdoutput, "", bot)
+                        else:
+                            print(tr_cmd)
 
 
 for (i, item) in enumerate(sys.argv):
@@ -83,8 +109,14 @@ for (i, item) in enumerate(sys.argv):
         singlerun = False
         continuous = True
         
+DIRECTORY_TO_WATCH = os.path.abspath(os.path.dirname(sys.argv[0])) + "/watchme/"
+observer = Observer()
+event_handler = zwHandler()
+observer.schedule(event_handler, DIRECTORY_TO_WATCH, recursive=True)
+observer.start()
         
 while continuous:
+
     if voice == True:
         phrase = speech.recognize()
         print("You: " + phrase)
@@ -100,29 +132,23 @@ while continuous:
                 res = res + "(*.*)\n"
                 res = res + "  ---"
                 sendMessage(chat_id, res)
+                Zorba.sendMessage(chat_id, bot, res)
             elif "WHAT?" == tr_cmd:
                 answer = chatter.reply(command)
-                sendMessage(chat_id, str(answer), voice)
+                Zorba.sendMessage(chat_id, bot, str(answer), voice)
             elif "SET continuous FALSE" == tr_cmd:
                 continuous = False
             else:
-                cmdoutput = ""
-                cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
-                print("OUTPUT:" + cmdoutput)
+                try:
+                    cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
+                except:
+                    cmdoutput = ""
                 if cmdoutput != "":
-                    if cmdoutput[:8] == "photo://":
-                        tmpfile = cmdoutput.replace("photo://", "")
-                        tmpfile = tmpfile.replace("\n", "")
-                        if os.path.isfile(tmpfile):
-                            print(tmpfile)
-                            os.system('w3m "' +tmpfile+'"')
-                            os.remove(tmpfile)
-                    elif cmdoutput[:4] == "Msg:":
-                        msg = cmdoutput.replace("Msg:", "")
-                        msg = msg.encode().decode('unicode_escape')
-                        if str(msg) != '':
-                            sendMessage(chat_id, str(msg), voice)
+                    Zorba.display_output(cmdoutput, "", bot)
                 else:
                     print(tr_cmd)
                     if singlerun == True:
                         continuous = False
+
+observer.stop()
+observer.join()

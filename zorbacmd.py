@@ -9,14 +9,7 @@ import select
 import subprocess
 import csv
 import re
-#try:
-#    import gnureadline as readline
-#except ImportError:
-#    import readline
-#from __future__ import braces #this makes it possible to use {} instead of indentation
 
-#readline.parse_and_bind('tab: complete')
-#readline.parse_and_bind('set editing-mode vi')
 
 class ZorbaCMD(object):
 
@@ -27,6 +20,13 @@ class ZorbaCMD(object):
 #        self.continuous = True
         self.dict_configured = False
         self.mydict = []
+        self.telegramusers = []
+        
+    def set_telegramusers(self, listusers):
+        try:
+            self.telegramusers = listusers
+        except:
+            self.telegramusers = []
         
     def find_between(self, s, first, last ):
         try:
@@ -190,6 +190,66 @@ class ZorbaCMD(object):
         phrase = re.sub(" \Z", "", phrase)
         return phrase
     
-
-    #TODO: we still need to use ZorbaNeuralNetwork to find most probable meaning for phrases that we can't actually translate with our dictionary
-    #TODO: ZorbaNeural could also be useful to understand emotions and feelings in the messages
+    def sendMessage(self, chat_id, bot, answer = "", voice = False, photofile = ""):
+        #global bot
+        #global language
+        try:
+            bot.getMe()
+            botvalid = True
+        except:
+            botvalid = False
+        print(photofile)
+        if answer != "":
+            if voice == True:
+                #we should send audio
+                newFileW = speech.speak(str(answer), str(chat_id))
+                if chat_id != "" and botvalid == True:
+                    bot.sendVoice(chat_id, open(newFileW, "rb"), caption = str(answer))
+                else:
+                    os.system('aplay "' + newFileW + '"')
+                    if os.path.isfile(newFileW): os.remove(newFileW)
+            else:
+                if chat_id != "" and botvalid == True:
+                    bot.sendMessage(chat_id, str(answer))
+                else:
+                    print(str(answer))
+        if photofile != "":
+            if chat_id != "" and botvalid == True:
+                bot.sendPhoto(chat_id, open(photofile, "rb"), caption = photofile)
+            else:
+                print(photofile)
+                os.system('w3m "' + photofile +'"')
+            os.remove(photofile)
+        
+    
+    def display_output(self, cmdoutput, chat_id, bot, voice = False):
+        chat_ids = []
+        if chat_id == "":
+            try:
+                users = self.telegramusers
+                if users != "":
+                    for usr in users:
+                        chat_ids.append(usr)
+            except:
+                chat_ids.append(chat_id)
+        else:
+            chat_ids.append(chat_id)
+        if cmdoutput == "":
+            return ""
+        if cmdoutput[:8] == "photo://":
+            tmpfile = cmdoutput.replace("photo://", "")
+            tmpfile = tmpfile.replace("\n", "")
+            if os.path.isfile(tmpfile):
+                for cid in chat_ids:
+                    self.sendMessage(cid, bot, "", voice, tmpfile)
+                if chat_id == "":
+                    self.sendMessage(chat_id, bot, "", voice, tmpfile)
+        elif cmdoutput[:4] == "Msg:":
+            msg = cmdoutput.replace("Msg:", "")
+            msg = msg.encode().decode('unicode_escape')
+            if str(msg) != '':
+                for cid in chat_ids:
+                    self.sendMessage(cid, bot, str(msg), voice)
+                if chat_id == "":
+                    self.sendMessage(chat_id, bot, str(msg), voice)
+    
