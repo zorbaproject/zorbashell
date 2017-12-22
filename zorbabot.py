@@ -4,9 +4,6 @@
 # Run this code with python3.5
 #
 
-#-ocr image from telegram photo https://github.com/python-telegram-bot/python-telegram-bot/wiki/Code-snippets#fetch-images-sent-to-your-bot
-#updates = bot.get_updates()
-#>>> print([u.message.photo for u in updates if u.message.photo])
 #http://telepot.readthedocs.io/en/latest/reference.html
 
 
@@ -32,6 +29,7 @@ attemptsfile = '/tmp/attempts.log' #the file where we log denied accesses
 active = 1 #if set to 0 the bot will stop
 ocrlang = ''
 language = ''#'it-IT'
+DIRECTORY_TO_WATCH = os.path.abspath(os.path.dirname(sys.argv[0])) + "/watchme/"
 
 if language == '' and os.path.isfile("zorbalanguage.txt"):
     text_file = open("zorbalanguage.txt", "r")
@@ -127,9 +125,7 @@ class zwHandler(FileSystemEventHandler):
                 text_file = open(event.src_path, "r")
                 content = text_file.read().replace("\n", "")
                 text_file.close()
-                if content[:4] != "CMD:":
-                    Zorba.display_output(content, "", bot)
-                else:
+                if content[:4] == "CMD:":
                     tr_cmd = Zorba.translate(content.replace("CMD:", ""))
                     if "WHAT?" == tr_cmd:
                         answer = chatter.reply(content)
@@ -143,7 +139,9 @@ class zwHandler(FileSystemEventHandler):
                             Zorba.display_output(cmdoutput, "", bot)
                         else:
                             print(tr_cmd)
-            #time.sleep(50)
+                else:
+                    Zorba.display_output(content, "", bot)
+                if os.path.isfile(event.src_path): os.remove(event.src_path)
 
 
         
@@ -235,8 +233,8 @@ def handle(msg):
             text_file.close()
             if lines != "":
                 Zorba.sendMessage(chat_id, bot, str(lines), True)
-#        if os.path.isfile(newFileJ): os.remove(newFileJ)
-#        if os.path.isfile(newFileT): os.remove(newFileT)
+        if os.path.isfile(newFileJ): os.remove(newFileJ)
+        if os.path.isfile(newFileT): os.remove(newFileT)
 
         
     try:
@@ -313,7 +311,6 @@ def handle(msg):
 bot.message_loop(handle)
 print('I am listening ...')
 
-DIRECTORY_TO_WATCH = os.path.abspath(os.path.dirname(sys.argv[0])) + "/watchme/"
 observer = Observer()
 event_handler = zwHandler()
 observer.schedule(event_handler, DIRECTORY_TO_WATCH, recursive=True)

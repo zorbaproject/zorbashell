@@ -1,16 +1,19 @@
 
 ## How to Install Zorba CMD
 Zorba itself should just work copying the source code using git, just run this commands on GNU/Linux:
+```
 sudo -s
-cd /root/
-git clone https://github.com/zorbaproject/zorba-cmd.git
+cd /root
+git clone https://github.com/zorbaproject/zorbashell.git
+./install.sh
+```
+You'll be asked a few questions about what you would actually like to install. If you are not sure, just install everything answering 'y'.
 
-Anyway, if you want to use advanced features you need to install a few things. You can do it running this command:
-/root/zorba-cmd/install.sh
-You'll be asked a few questions about what you would actually like to install. If you are not sure, just install everything ansering 'y'.
+If you don't want Zorba to be run only by root, you may use /opt folder instead of /root.
 
-If you don't want zorba to be run only by root, you may use /opt folder instead of /root.
-
-## How to run Zorba CMD without vocal abilities
-
-## How to run Zorba CMD vocal assistant
+## How to run ZorbaShell vocal assistant
+Run zorbashell with -v argument:
+```
+./zorbashell.py -v
+```
+Of course you'll need a working microphone.

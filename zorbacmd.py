@@ -219,7 +219,7 @@ class ZorbaCMD(object):
             else:
                 print(photofile)
                 os.system('w3m "' + photofile +'"')
-            os.remove(photofile)
+            if os.path.isfile(photofile): os.remove(photofile)
         
     
     def display_output(self, cmdoutput, chat_id, bot, voice = False):

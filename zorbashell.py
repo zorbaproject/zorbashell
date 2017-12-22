@@ -17,8 +17,6 @@ from zorbachatter import ZorbaChatter
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-#got code from https://www.michaelcho.me/article/using-pythons-watchdog-to-monitor-changes-to-a-directory
-#pip3 install watchdog
 
 
 try:
@@ -30,28 +28,29 @@ except ImportError:
 readline.parse_and_bind('tab: complete')
 readline.parse_and_bind('set editing-mode vi')
 
+
+DIRECTORY_TO_WATCH = os.path.abspath(os.path.dirname(sys.argv[0])) + "/watchme/"
 language = ''#'it-IT'
-
-if language == '' and os.path.isfile("zorbalanguage.txt"):
-    text_file = open("zorbalanguage.txt", "r")
-    language = text_file.read().replace("\n", "")
-    text_file.close()
-
-
-Zorba = ZorbaCMD(language)
-
-speech = ZorbaSpeech(language)
-
-chatter = ZorbaChatter(language)
-chatter.clearTraining()
-chatter.train()
-
 singlerun = False
 continuous = True
 voice = False
 
 bot = []
 chat_id = ""
+
+
+
+if language == '' and os.path.isfile("zorbalanguage.txt"):
+    text_file = open("zorbalanguage.txt", "r")
+    language = text_file.read().replace("\n", "")
+    text_file.close()
+
+Zorba = ZorbaCMD(language)
+speech = ZorbaSpeech(language)
+
+chatter = ZorbaChatter(language)
+chatter.clearTraining()
+chatter.train()
 
 
 
@@ -73,9 +72,7 @@ class zwHandler(FileSystemEventHandler):
                 text_file = open(event.src_path, "r")
                 content = text_file.read().replace("\n", "")
                 text_file.close()
-                if content[:4] != "CMD:":
-                    Zorba.display_output(content, "", bot)
-                else:
+                if content[:4] == "CMD:":
                     tr_cmd = Zorba.translate(content.replace("CMD:", ""))
                     if "WHAT?" == tr_cmd:
                         answer = chatter.reply(content)
@@ -89,11 +86,14 @@ class zwHandler(FileSystemEventHandler):
                             Zorba.display_output(cmdoutput, "", bot)
                         else:
                             print(tr_cmd)
-
+                else:
+                    Zorba.display_output(content, "", bot)
+                if os.path.isfile(event.src_path): os.remove(event.src_path)
+            
 
 for (i, item) in enumerate(sys.argv):
     if item == "-h":
-        print("Options:\n -l specify language\n -p specify phrase to analize\n -c continuous mode, works as a shell (default)")
+        print("Options:\n -l specify language\n -p specify phrase to analize\n -c continuous mode, works as a shell (default)\n -v uses voice recognition and sinthesys")
         
     if item == "-l":
         language = sys.argv[i+1]
@@ -109,7 +109,6 @@ for (i, item) in enumerate(sys.argv):
         singlerun = False
         continuous = True
         
-DIRECTORY_TO_WATCH = os.path.abspath(os.path.dirname(sys.argv[0])) + "/watchme/"
 observer = Observer()
 event_handler = zwHandler()
 observer.schedule(event_handler, DIRECTORY_TO_WATCH, recursive=True)
