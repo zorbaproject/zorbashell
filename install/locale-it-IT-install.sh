@@ -15,6 +15,15 @@ version="cmusphinx-it-5.2"
 inst_dir="/usr/local/lib/python3.5/dist-packages/speech_recognition/pocketsphinx-data/it-IT"
 acmodel_dir="voxforge_it_sphinx.cd_cont_2000"
 
+if [ -d "/usr/local/lib/python3.4/dist-packages" ]; then
+thisfolder=$(pwd)
+mkdir -p /usr/local/lib/python3.4/dist-packages/speech_recognition/pocketsphinx-data
+cp ./raspbian-sphinx/it-IT.zip /usr/local/lib/python3.4/dist-packages/speech_recognition/pocketsphinx-data/it-IT.zip
+cd /usr/local/lib/python3.4/dist-packages/speech_recognition/pocketsphinx-data/
+unzip it-IT.zip
+cd $thisfolder
+fi
+
 #following instructions: https://github.com/Uberi/speech_recognition/blob/master/reference/pocketsphinx.rst
 
 wget https://sourceforge.net/projects/cmusphinx/files/Acoustic%20and%20Language%20Models/Italian/$version.tar.gz/download
