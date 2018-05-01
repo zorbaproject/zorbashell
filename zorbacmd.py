@@ -190,7 +190,7 @@ class ZorbaCMD(object):
         phrase = re.sub(" \Z", "", phrase)
         return phrase
     
-    def sendMessage(self, chat_id, bot, answer = "", voice = False, photofile = ""):
+    def sendMessage(self, chat_id, bot, speech, answer = "", voice = False, photofile = ""):
         #global bot
         #global language
         try:
@@ -222,7 +222,7 @@ class ZorbaCMD(object):
             if os.path.isfile(photofile): os.remove(photofile)
         
     
-    def display_output(self, cmdoutput, chat_id, bot, voice = False):
+    def display_output(self, cmdoutput, chat_id, bot, speech, voice = False):
         chat_ids = []
         if chat_id == "":
             try:
@@ -241,15 +241,15 @@ class ZorbaCMD(object):
             tmpfile = tmpfile.replace("\n", "")
             if os.path.isfile(tmpfile):
                 for cid in chat_ids:
-                    self.sendMessage(cid, bot, "", voice, tmpfile)
+                    self.sendMessage(cid, bot, speech, "", voice, tmpfile)
                 if chat_id == "":
-                    self.sendMessage(chat_id, bot, "", voice, tmpfile)
+                    self.sendMessage(chat_id, bot,speech, "", voice, tmpfile)
         elif cmdoutput[:4] == "Msg:":
             msg = cmdoutput.replace("Msg:", "")
             msg = msg.encode().decode('unicode_escape')
             if str(msg) != '':
                 for cid in chat_ids:
-                    self.sendMessage(cid, bot, str(msg), voice)
+                    self.sendMessage(cid, bot, speech, str(msg), voice)
                 if chat_id == "":
-                    self.sendMessage(chat_id, bot, str(msg), voice)
+                    self.sendMessage(chat_id, bot, speech, str(msg), voice)
     

@@ -129,18 +129,18 @@ class zwHandler(FileSystemEventHandler):
                     tr_cmd = Zorba.translate(content.replace("CMD:", ""))
                     if "WHAT?" == tr_cmd:
                         answer = chatter.reply(content)
-                        Zorba.sendMessage(chat_id, bot, str(answer))
+                        Zorba.sendMessage(chat_id, bot, speech, str(answer))
                     else:
                         try:
                             cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
                         except:
                             cmdoutput = ""
                         if cmdoutput != "":
-                            Zorba.display_output(cmdoutput, "", bot)
+                            Zorba.display_output(cmdoutput, "", bot, speech, False)
                         else:
                             print(tr_cmd)
                 else:
-                    Zorba.display_output(content, "", bot)
+                    Zorba.display_output(content, "", bot, speech, False)
                 if os.path.isfile(event.src_path): os.remove(event.src_path)
 
 
@@ -232,7 +232,7 @@ def handle(msg):
             lines = text_file.read()
             text_file.close()
             if lines != "":
-                Zorba.sendMessage(chat_id, bot, str(lines), True)
+                Zorba.sendMessage(chat_id, bot, speech, str(lines), True)
         if os.path.isfile(newFileJ): os.remove(newFileJ)
         if os.path.isfile(newFileT): os.remove(newFileT)
 
@@ -246,7 +246,7 @@ def handle(msg):
         
 
     if command == '/time':
-        Zorba.sendMessage(chat_id, bot, str(datetime.datetime.now()))
+        Zorba.sendMessage(chat_id, bot, speech, str(datetime.datetime.now()))
     elif '/adduser' in command:
         if len(command.split(' ')) > 1:
             usrname = command.split(' ')[1]
@@ -255,7 +255,7 @@ def handle(msg):
         if usrname == "" :
             usrname = str(sender)
         adduser(usrname)
-        Zorba.sendMessage(chat_id, bot, "User "+usrname+" added")
+        Zorba.sendMessage(chat_id, bot, speech, "User "+usrname+" added")
     elif '/deluser' in command:
         if len(command.split(' ')) > 1:
             usrname = command.split(' ')[1]
@@ -264,23 +264,23 @@ def handle(msg):
         if usrname == "" :
             usrname = str(sender)
         deluser(usrname)
-        Zorba.sendMessage(chat_id, bot, "User "+usrname+" deleted")
+        Zorba.sendMessage(chat_id, bot, speech, "User "+usrname+" deleted")
     elif command == '/help':
-        Zorba.sendMessage(chat_id, bot, "/adduser /deluser /time /exit")
+        Zorba.sendMessage(chat_id, bot, speech, "/adduser /deluser /time /exit")
     elif command == '/exit':
         global active
         active = False
-        Zorba.sendMessage(chat_id, bot, "The bot will shutdown in 10 seconds")
+        Zorba.sendMessage(chat_id, bot, speech, "The bot will shutdown in 10 seconds")
     elif command != '':
         tr_cmd = Zorba.translate(command)
         if "SAYHELLO" == tr_cmd:
             res = "  ^_^\n"
             res = res + "(*.*)\n"
             res = res + "  ---"
-            Zorba.sendMessage(chat_id, bot, res)
+            Zorba.sendMessage(chat_id, bot, speech,res)
         elif "WHAT?" == tr_cmd:
             answer = chatter.reply(command)
-            Zorba.sendMessage(chat_id, bot, str(answer), voice)
+            Zorba.sendMessage(chat_id, bot, speech,str(answer), voice)
         elif "SET continuous FALSE" == tr_cmd:
                         active = False
         else:
@@ -291,9 +291,9 @@ def handle(msg):
             print("OUTPUT:" + cmdoutput)
             
             if cmdoutput != "":
-                Zorba.display_output(cmdoutput, chat_id, bot, voice)
+                Zorba.display_output(cmdoutput, chat_id, bot, speech, voice)
             else:
-                Zorba.sendMessage(chat_id, bot, str(tr_cmd))
+                Zorba.sendMessage(chat_id, bot, speech, str(tr_cmd))
 
 
 #TODO: rewrite this function to send user text written by other scripts on a temporary file (that gets removed after sending message)

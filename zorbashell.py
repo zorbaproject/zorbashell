@@ -76,18 +76,18 @@ class zwHandler(FileSystemEventHandler):
                     tr_cmd = Zorba.translate(content.replace("CMD:", ""))
                     if "WHAT?" == tr_cmd:
                         answer = chatter.reply(content)
-                        Zorba.sendMessage(chat_id, bot, str(answer))
+                        Zorba.sendMessage(chat_id, bot, speech, str(answer), voice, "")
                     else:
                         try:
                             cmdoutput = subprocess.check_output(tr_cmd, shell=True).decode('UTF-8')
                         except:
                             cmdoutput = ""
                         if cmdoutput != "":
-                            Zorba.display_output(cmdoutput, "", bot)
+                            Zorba.display_output(cmdoutput, "", bot, speech, voice)
                         else:
                             print(tr_cmd)
                 else:
-                    Zorba.display_output(content, "", bot)
+                    Zorba.display_output(content, "", bot, speech, voice)
                 if os.path.isfile(event.src_path): os.remove(event.src_path)
             
 
@@ -130,11 +130,11 @@ while continuous:
                 res = "  ^_^\n"
                 res = res + "(*.*)\n"
                 res = res + "  ---"
-                sendMessage(chat_id, res)
-                Zorba.sendMessage(chat_id, bot, res)
+                #sendMessage(chat_id, res)
+                Zorba.sendMessage(chat_id, bot, speech, res)
             elif "WHAT?" == tr_cmd:
                 answer = chatter.reply(command)
-                Zorba.sendMessage(chat_id, bot, str(answer), voice)
+                Zorba.sendMessage(chat_id, bot, speech, str(answer), voice)
             elif "SET continuous FALSE" == tr_cmd:
                 continuous = False
             else:
@@ -143,7 +143,7 @@ while continuous:
                 except:
                     cmdoutput = ""
                 if cmdoutput != "":
-                    Zorba.display_output(cmdoutput, "", bot)
+                    Zorba.display_output(cmdoutput, "", bot, speech, voice)
                 else:
                     print(tr_cmd)
                     if singlerun == True:
