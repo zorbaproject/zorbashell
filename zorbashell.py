@@ -45,6 +45,9 @@ if language == '' and os.path.isfile("zorbalanguage.txt"):
     language = text_file.read().replace("\n", "")
     text_file.close()
 
+if language == '':
+    language = 'it-IT'
+
 Zorba = ZorbaCMD(language)
 speech = ZorbaSpeech(language)
 
@@ -93,7 +96,7 @@ class zwHandler(FileSystemEventHandler):
 
 for (i, item) in enumerate(sys.argv):
     if item == "-h":
-        print("Options:\n -l specify language\n -p specify phrase to analize\n -c continuous mode, works as a shell (default)\n -v uses voice recognition and sinthesys")
+        print("Options:\n -l specify language\n -p specify phrase to analize\n -c continuous mode, works as a shell (default)\n -v uses voice recognition and sinthesys\n -t allows you to tune the speech recognition model for your own voice")
         
     if item == "-l":
         language = sys.argv[i+1]
@@ -104,6 +107,12 @@ for (i, item) in enumerate(sys.argv):
         
     if item == "-v":
         voice = True
+        
+    if item == "-t":
+        singlerun = True
+        continuous = False
+        speech.train('')
+        sys.exit(0)
         
     if item == "-c":
         singlerun = False

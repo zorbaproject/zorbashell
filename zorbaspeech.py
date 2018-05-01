@@ -243,9 +243,9 @@ class ZorbaSpeech(object):
             no = set(['no','n', ''])
 
             #choice = ''
-            #if "linux" in sys.platform:
-            #    print("Do you want to INSTALL the new voice model? [y/N]")
-            #    choice = input().lower()
+            if choice == '' and "linux" in sys.platform:
+                print("Do you want to INSTALL the new voice model? [y/N]")
+                choice = input().lower()
                 #if you are not on a GNU/Linux system, you may install manually the new voice model
        
             if choice in yes:

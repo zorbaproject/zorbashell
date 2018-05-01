@@ -36,6 +36,8 @@ if language == '' and os.path.isfile("zorbalanguage.txt"):
     language = text_file.read().replace("\n", "")
     text_file.close()
 
+if language == '':
+    language = 'it-IT'
 
 Zorba = ZorbaCMD(language)
 
