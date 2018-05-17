@@ -39,3 +39,6 @@ echo "00,30 * * * * $updatefile" >> $cronfile
 fi
 
 apt-get install tesseract-ocr tesseract-ocr-eng tesseract-ocr-ita
+
+systemctl enable zorbabot.service
+systemctl start zorbabot.service
