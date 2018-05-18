@@ -15,6 +15,14 @@ if echo "$answer" | grep -iq "^y" ;then
 
 fi
 
+echo -n "Do you want to install Zorba Voice Assistant (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^y" ;then
+
+/bin/bash $(dirname $(readlink -f $0))/install/install_zorbashell.sh
+
+fi
+
 echo -n "Do you want to install Zorba Telegram Bot (y/n)? "
 read answer
 if echo "$answer" | grep -iq "^y" ;then
